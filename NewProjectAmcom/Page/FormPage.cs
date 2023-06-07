@@ -12,7 +12,9 @@ public class FormPage
     private readonly ILocator _lnkPopUpMensage;
     private readonly ILocator _btnSelecionarCor;
     private readonly ILocator _btnClose;
+    private readonly ILocator _btnSaudacao;
     private readonly IPage _page;
+
 
     public FormPage(IPage page)
     {
@@ -24,6 +26,7 @@ public class FormPage
         _btnEnviar = page.Locator("text=Enviar");
         _lnkPopUpMensage = page.Locator("text=Enviado com sucesso");
         _btnClose = page.Locator("xpath=//button[contains(@onclick,'closeModal()')]");
+        _btnSaudacao = page.Locator("text=Saudação");
 
     }
 
@@ -39,11 +42,30 @@ public class FormPage
         await _btnEnviar.ClickAsync();
     }
 
+    public async Task ClickSaudacao()
+    {
+        await _btnSaudacao.ClickAsync();
+    }
+
+
     public async Task Form(string Nome, string Sobrenome, int Telefone)
     {
         await _txtNome.FillAsync(Nome);
         await _txtSobreNome.FillAsync(Sobrenome);
         await _txtTelefone.FillAsync(Telefone.ToString());
+
+    }
+
+    public async Task Form2(string Nome, string Sobrenome)
+    {
+        await _txtNome.FillAsync(Nome);
+        await _txtSobreNome.FillAsync(Sobrenome);
+    
+    }
+
+    public async Task Form3(string Nome)
+    {
+        await _txtNome.FillAsync(Nome);
 
     }
 
@@ -55,6 +77,11 @@ public class FormPage
     public async Task ClickClose()
     {
         await _btnClose.ClickAsync();
+    }
+
+    public async Task GreetingMensage() 
+    {
+       
     }
 
 }

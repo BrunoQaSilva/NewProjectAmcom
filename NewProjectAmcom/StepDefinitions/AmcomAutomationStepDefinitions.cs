@@ -6,6 +6,8 @@ using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using Microsoft.Playwright;
 using System.Runtime.CompilerServices;
+using System.Drawing;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ProjetoAmcom.StepDefinitions
 {
@@ -32,6 +34,21 @@ namespace ProjetoAmcom.StepDefinitions
         {
             dynamic data = table.CreateDynamicInstance();
             await _formPage.Form((string)data.Nome, (string)data.SobreNome, (int)data.Telefone);
+        }
+
+        [When(@"fill in the textbox of the form reduced")]
+        public async Task WhenFillInTheTextboxOfTheFormReduced(Table table)
+        {
+            dynamic data = table.CreateDynamicInstance();
+            await _formPage.Form2((string)data.Nome, (string)data.SobreNome);
+        }
+
+
+        [When(@"fill in the textbox of the form most reduced")]
+        public async Task WhenFillInTheTextboxOfTheFormMostReduced(Table table)
+        {
+            dynamic data = table.CreateDynamicInstance();
+            await _formPage.Form3((string)data.Nome);
         }
 
         [When(@"I wait for (.*) seconds")]
@@ -65,6 +82,23 @@ namespace ProjetoAmcom.StepDefinitions
             await _formPage.ClickClose();
         }
 
+        [Then(@"Wait to confirm (.*) seconds close")]
+        public async Task ThenWaitToConfirmSecondsClose(int seconds)
+        {
+            Thread.Sleep(TimeSpan.FromSeconds(seconds));
+        }
+
+        [Then(@"The element id ""([^""]*)"" with the color ""([^""]*)""")]
+        public async Task ThenTheElementIdWithTheColor(string elementId, string corEsperada)
+        {
+            var elementHandle = await _driver.Page.QuerySelectorAsync($"{elementId}");
+            var actualBackgroundColor = await elementHandle.EvaluateAsync("element => getComputedStyle(element).backgroundColor");
+
+            // Verifica se a cor atual é igual à cor esperada
+            Assert.AreEqual($"{corEsperada}", $"{actualBackgroundColor}");
+        }
+
+
         [When(@"I scroll the page down")]
         public async Task GivenIScrollThePageDown()
         {
@@ -93,5 +127,55 @@ namespace ProjetoAmcom.StepDefinitions
             await _driver.Page.Keyboard.PressAsync("Enter");
         }
 
+        [When(@"I select to a color Red")]
+        public async Task WhenISelectToAColorRed()
+        {
+            await _driver.Page.Keyboard.PressAsync("ArrowDown");
+            await _driver.Page.Keyboard.PressAsync("ArrowDown");
+            await _driver.Page.Keyboard.PressAsync("ArrowDown");
+            await _driver.Page.Keyboard.PressAsync("Enter");
+        }
+
+        [When(@"I click in Saudação button")]
+        public async Task WhenIClickInSaudacaoButton()
+        {
+            await _formPage.ClickSaudacao();
+        }
+
+        [Then(@"The app returns a greeting message")]
+        public async Task ThenTheAppReturnsAGreetingMessage()
+        {
+            bool isMorningAlertDisplayed = false;
+            bool isAfternoonAlertDisplayed = false;
+            bool isEveningAlertDisplayed = false;
+
+            _driver.Page.Dialog += async (_, args) =>
+            {
+                string dialogMessage = args.Message;
+
+                if (dialogMessage == "Bom dia")
+                {
+                    isMorningAlertDisplayed = true;
+                }
+                else if (dialogMessage == "Boa tarde")
+                {
+                    isAfternoonAlertDisplayed = true;
+                }
+                else if (dialogMessage == "Boa noite")
+                {
+                    isEveningAlertDisplayed = true;
+                }
+
+                await args.DismissAsync();
+            };
+
+            await _formPage.ClickSaudacao();
+
+            Console.WriteLine(isMorningAlertDisplayed ? "O alerta 'Bom dia' foi exibido." : "O alerta 'Bom dia' não foi exibido.");
+            Console.WriteLine(isAfternoonAlertDisplayed ? "O alerta 'Boa tarde' foi exibido." : "O alerta 'Boa tarde' não foi exibido.");
+            Console.WriteLine(isEveningAlertDisplayed ? "O alerta 'Boa noite' foi exibido." : "O alerta 'Boa noite' não foi exibido.");
+
+
+        }
     }
 }
